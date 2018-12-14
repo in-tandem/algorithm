@@ -49,11 +49,14 @@ def calculate_distance(a, b):
     
     return round(sqrt(  (a.x - b.x)**2 + (a.y - b.y)**2  ))
 
-def display_map(location_list, start_node, end_node):
+def display_map(location_list, start_node, end_node, navigation):
     
     plot.scatter([i.x for i in location_list], [i.y for i in location_list], marker ='x')
     plot.scatter(start_node.x,start_node.y,facecolors='red',alpha=.55, s=100, label = 'start')
     plot.scatter(end_node.x,end_node.y,facecolors='green',alpha=.55, s=100, label = 'end')
+    x = [i.x for i in navigation]
+    y = [i.y for i in navigation]
+    plot.plot(x,y,'-o') 
     plot.title("Cities to Hit")
     plot.legend(loc='best')
     plot.show()
@@ -93,12 +96,12 @@ def find_shortest_route(start_node, end_node):
             print('reached node')
             print([str(i) for i in navigation_map])
 
-            break
+            return navigation_map
 
         f_score =  current_node.g_cost + calculate_distance(current_node, end_node)
         print('current node: ',(current_node.x, current_node.y), 'f score:' , f_score)
 
-        neighbors = find_neighbors(current_node, location_list, neighbor_distance = 200)
+        neighbors = find_neighbors(current_node, location_list, neighbor_distance = 100)
 
         ## we need to get the neighbor with the least f score and add it
         ## at the end of the open_set
@@ -136,18 +139,20 @@ def find_shortest_route(start_node, end_node):
             open_set.append(new_list[0])
         
         closed_set.append(current_node)
+
+    
             
 
 ## lets create our sample data. forming a grid 
-x = [100,100,100,100,300,300,300,300,500,500,500,500]
-y = [100,200,300,400,400,300,200,100,400,200,300,100]
+x = [100,100,100,100,300,300,300,300,500,500,500,500, 600,600,600,600]
+y = [100,200,300,400,400,300,200,100,400,200,300,100, 400,300,200,100]
 
 
 location_list = [Location(i,j) for i, j in zip(x,y)]
 start_node = location_list[3]
 end_node = location_list[-1]
 
-find_shortest_route(start_node, end_node)
-display_map(location_list, start_node, end_node)
+navigation = find_shortest_route(start_node, end_node)
+display_map(location_list, start_node, end_node, navigation)
 
 # print(calculate_distance(Location(100,400), Location(100,200)))
