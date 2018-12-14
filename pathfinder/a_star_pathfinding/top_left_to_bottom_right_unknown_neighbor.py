@@ -16,6 +16,7 @@ Assumptions:
 import numpy as np 
 from matplotlib import pyplot as plot 
 from math import sqrt
+from copy import deepcopy
 
 class Location(object):
 
@@ -65,7 +66,7 @@ def display_map(location_list, start_node, end_node):
 def find_neighbors(location, location_list, neighbor_distance = 500):
 
     neighbors = list(filter(\
-            lambda i : calculate_distance(i,location) <= neighbor_distance,
+            lambda i : 0 < calculate_distance(i,location) <= neighbor_distance,
                     location_list))
 
 
@@ -83,9 +84,11 @@ def find_shortest_route(start_node, end_node):
 
     while len(open_set) > 0 : 
 
-        ## our data structure would be such that last element is always the lowest
-        current_node = open_set.pop()
         
+        ## our data structure would be such that last element is always the lowest
+        current_node = deepcopy(open_set.pop())
+        
+
         if current_node.x == end_node.x and current_node.y == end_node.y:
             print('reached node')
             print([str(i) for i in navigation_map])
@@ -93,7 +96,7 @@ def find_shortest_route(start_node, end_node):
             break
 
         f_score =  current_node.g_cost + calculate_distance(current_node, end_node)
-        print('f score:' , f_score)
+        print('current node: ',(current_node.x, current_node.y), 'f score:' , f_score)
 
         neighbors = find_neighbors(current_node, location_list, neighbor_distance = 200)
 
@@ -102,27 +105,38 @@ def find_shortest_route(start_node, end_node):
         ## after that we can add the current node to the closed set
 
         print([str(i) for i in neighbors])
-
+        temp_neighbor = []
         for neighbor in neighbors:
 
             ##navigating to each neighbor is cost of 1
+            ## we will ignore neighbors where we already encountered
+
+            if (neighbor.x,neighbor.y) in [(kk.x,kk.y) for kk in closed_set]:
+                print('found ', (neighbor.x,neighbor.y), ' in ', [str(kk) for kk in closed_set])
+                continue
+
             neighbor.g_cost = current_node.g_cost + 1
             neighbor.h_cost = calculate_distance(neighbor, end_node)
             f_neighbor = neighbor.g_cost + neighbor.h_cost
             neighbor.f_cost = f_neighbor
             print(f_neighbor)
+            temp_neighbor.append(neighbor)
 
-            if f_neighbor < f_score:
+            # if f_neighbor < f_score:
                 
-                print('adding to open set :', neighbor.x, neighbor.y)
-                open_set.append(neighbor)
-                navigation_map.append(neighbor)
+            #     print('adding to open set :', neighbor.x, neighbor.y)
+            #     open_set.append(neighbor)
+            #     navigation_map.append(neighbor)
             
-        # new_list = sorted(neighbors, key = lambda x: x.f_cost, reverse = False)
-        # print(new_list[0].f_cost)
-        # open_set.append(new_list[0])
+        new_list = sorted(temp_neighbor, key = lambda x: x.f_cost, reverse = False)
+    
+        if new_list and new_list[0].f_cost <= f_score:
 
+            navigation_map.append(new_list[0])
+            open_set.append(new_list[0])
+        
         closed_set.append(current_node)
+            
 
 ## lets create our sample data. forming a grid 
 x = [100,100,100,100,300,300,300,300,500,500,500,500]
