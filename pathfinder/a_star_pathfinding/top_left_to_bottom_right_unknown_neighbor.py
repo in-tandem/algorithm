@@ -76,7 +76,7 @@ def find_neighbors(location, location_list, neighbor_distance = 500):
     return neighbors
 
 
-def find_shortest_route(start_node, end_node, neighbor_distance = 200):
+def find_shortest_route(start_node, end_node, location_list, neighbor_distance = 200):
 
     open_set = [start_node]
     closed_set = []
@@ -137,16 +137,18 @@ def find_shortest_route(start_node, end_node, neighbor_distance = 200):
     print('No Solution found')
     return None
 
-## lets create our sample data. forming a grid 
-x = [100,100,100,100,300,300,300,300,500,500,500,500, 600,600,600,600]
-y = [100,200,300,400,400,300,200,100,400,200,300,100, 400,300,200,100]
+
+def execute():
+    ## lets create our sample data. forming a grid 
+    x = [100,100,100,100,300,300,300,300,500,500,500,500, 600,600,600,600]
+    y = [100,200,300,400,400,300,200,100,400,200,300,100, 400,300,200,100]
 
 
-location_list = [Location(i,j) for i, j in zip(x,y)]
-start_node = location_list[3]
-end_node = location_list[-1]
+    location_list = [Location(i,j) for i, j in zip(x,y)]
+    start_node = location_list[3]
+    end_node = location_list[-1]
 
-navigation = find_shortest_route(start_node, end_node, neighbor_distance = 100)
-display_map(location_list, start_node, end_node, navigation) if navigation else None
+    navigation = find_shortest_route(start_node, end_node, location_list, neighbor_distance = 300)
+    display_map(location_list, start_node, end_node, navigation) if navigation else None
 
-# print(calculate_distance(Location(100,400), Location(100,200)))
+execute()
