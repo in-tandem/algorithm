@@ -76,7 +76,7 @@ def find_neighbors(location, location_list, neighbor_distance = 500):
     return neighbors
 
 
-def find_shortest_route(start_node, end_node):
+def find_shortest_route(start_node, end_node, neighbor_distance = 200):
 
     open_set = [start_node]
     closed_set = []
@@ -101,7 +101,7 @@ def find_shortest_route(start_node, end_node):
         f_score =  current_node.g_cost + calculate_distance(current_node, end_node)
         print('current node: ',(current_node.x, current_node.y), 'f score:' , f_score)
 
-        neighbors = find_neighbors(current_node, location_list, neighbor_distance = 100)
+        neighbors = find_neighbors(current_node, location_list, neighbor_distance = neighbor_distance)
 
         ## we need to get the neighbor with the least f score and add it
         ## at the end of the open_set
@@ -124,12 +124,6 @@ def find_shortest_route(start_node, end_node):
             neighbor.f_cost = f_neighbor
             print(f_neighbor)
             temp_neighbor.append(neighbor)
-
-            # if f_neighbor < f_score:
-                
-            #     print('adding to open set :', neighbor.x, neighbor.y)
-            #     open_set.append(neighbor)
-            #     navigation_map.append(neighbor)
             
         new_list = sorted(temp_neighbor, key = lambda x: x.f_cost, reverse = False)
     
@@ -140,8 +134,8 @@ def find_shortest_route(start_node, end_node):
         
         closed_set.append(current_node)
 
-    
-            
+    print('No Solution found')
+    return None
 
 ## lets create our sample data. forming a grid 
 x = [100,100,100,100,300,300,300,300,500,500,500,500, 600,600,600,600]
@@ -152,7 +146,7 @@ location_list = [Location(i,j) for i, j in zip(x,y)]
 start_node = location_list[3]
 end_node = location_list[-1]
 
-navigation = find_shortest_route(start_node, end_node)
-display_map(location_list, start_node, end_node, navigation)
+navigation = find_shortest_route(start_node, end_node, neighbor_distance = 100)
+display_map(location_list, start_node, end_node, navigation) if navigation else None
 
 # print(calculate_distance(Location(100,400), Location(100,200)))
