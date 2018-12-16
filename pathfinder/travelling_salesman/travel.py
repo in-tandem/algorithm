@@ -51,6 +51,11 @@ def cost_function(starting_point, points, end_point, sum_distance = 0):
 
     else:
 
+        ## you select a pool with all possibilities except a single element k and statting point s
+        ## calculate cost of each
+        ## select the ones with lowest cost
+        ## in case , pool selections are greater than single value, recursion would apply
+        
         return min(map(lambda x :cost_function(starting_point,[x], end_point + [x],sum_distance) + \
                 cost_function(x, [i for i in points if i !=x and i!= starting_point],end_point + [x],sum_distance),\
                  points))
