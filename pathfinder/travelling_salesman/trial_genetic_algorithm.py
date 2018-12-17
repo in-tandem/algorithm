@@ -37,11 +37,10 @@ class DNA(object):
             we have 10/100 chance of swapping the characters with
             a new character
         """
-        for item in self.data:
-
-            if(random.random()< self.mutation_rate): ## this code has a chance of executing self.mutation_rate times
-
-                item = sample_set[random.randint(0, len(sample_set)-1)]
+        
+        if(random.random() < self.mutation_rate): ## this code has a chance of executing self.mutation_rate times
+            
+            self.data[random.randint(0, len(self.data)-1)] = self.data[random.randint(0, len(self.data)-1)]
     
     def crossover(self, another_dna):
 
@@ -52,9 +51,9 @@ class DNA(object):
         fitness will be 0 since this particular dna hasnt undergone fitness evaluation yet
 
         """
-
-        from_this_as_parent = self.data[0: len(self.data)//2]
-        from_another_parent = another_dna.data[0: len(self.data)-len(self.data)//2 ]
+        mid = len(self.data)//2
+        from_this_as_parent = self.data[0: mid ]
+        from_another_parent = another_dna.data[mid: len(self.data)]
         
         return DNA(self.mutation_rate, from_this_as_parent+from_another_parent)
 
@@ -71,18 +70,18 @@ class DNA(object):
         if ''.join(self.data) == required_data:
             return True
         else:    
-            self.fitness = len(list(filter(lambda x: x[0]==x[1], [(i,j) for i,j in zip(self.data,required_data)]))) * 100
+            self.fitness = len(list(filter(lambda x: x[0]==x[1], [(i,j) for i,j in zip(self.data,required_data)]))) 
             print('Comparing ',''.join(self.data),' , with required data: ', required_data, ' failed. Giving \
                         fitness score of ', self.fitness )
 
 
 class Population(object):
     
-    def __init__(self, mutation_rate, size, dna_size, samples):
+    def __init__(self, mutation_rate, size, dna_size, samples, dna_sample = None):
 
         self.mutation_rate = mutation_rate
         self.size = size
-        self.dna_sample = []
+        self.dna_sample = dna_sample if dna_sample else []
         self.dna_size = dna_size
         self.mating_pool = []
         self.samples = samples
@@ -152,16 +151,31 @@ class Population(object):
             5. however we will still have lower score parents so that we can get variations in genee pool
             6. higher variations would mean higher chances of getting actual required phrase 
 
+        
+        mating pool size has to be bigger.parents will give birth to more number of children
+        each with variations more possibility of finding a match
+
+        this is also where fitness score comes in handy
+        we will generate children 100 times of the fitness scores
+        so fitness value of 4 means, there will be 400 times better children than say
+        100 times weaker children
+
         """
 
         temp = deepcopy(self.mating_pool)
         self.mating_pool = []
 
-        ## as an example we will take mating pool size the 3/4th the size of population
+        total_fitness = sum([i.fitness for i in temp])
+        total_fitness = total_fitness if total_fitness >0 else 1
+        print('size of population is ' ,self.size)
 
-        for _ in range(round((3*self.size)/4)):
+        for count in range(self.size): ## loop the number of dnas in the population
 
-            self.mating_pool.append(self.dna_sample[random.randint(0,self.size-1)])    
+            dna = temp[count] if len(temp)>0 else self.dna_sample[count]
+            score = (dna.fitness/total_fitness) *10
+
+            for i in range(round(score)):
+                self.mating_pool.append(dna)    
 
 
     def populate(self, target):
@@ -212,10 +226,10 @@ def execute():
 
     """
 
-    target_phrase = 'cate'
+    target_phrase = 'cat'
 
     timer = CodeTimer('timer')    
-    population_size = random.randint(10000,60000)
+    population_size = random.randint(50,100)
 
     with timer:
 
@@ -223,18 +237,18 @@ def execute():
         target_size = len(target_phrase)
         mutation_rate = random.random()
 
-        population = Population(mutation_rate, population_size, target_size,samples)
+        population = Population(mutation_rate, 10, target_size,samples)
         population.populate(samples)
         
         print('starting genetic mutations....')
-
+        count = 1
         while True:
             
             ## recalculation fitness scores happens over new mating pool
             flag = population.calculate_fitness(target_phrase)
             
             if flag:
-                print('Found phrase')
+                print('Found phrase. solution found in generation: ', count)
                 break
         
             else:
@@ -243,7 +257,19 @@ def execute():
                 population.natural_selection()
                 population.crossover()
 
+                ## my population, is hopefully more evolved at this point.
+                ## replacing old population with the one that has mated and mutated
+                temp = population
+                population = Population( \
+                                    mutation_rate = temp.mutation_rate, \
+                                    size = len(temp.mating_pool), \
+                                    dna_size = temp.dna_size, \
+                                    samples = temp.samples, \
+                                    dna_sample = temp.mating_pool
+                                        )
                 print('Natural selection and cross over completed. proceeding to check again')
+        
+            count = count + 1
 
     print(timer.took)
 
