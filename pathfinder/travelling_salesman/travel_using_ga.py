@@ -213,38 +213,48 @@ def execute():
     sample = list(range(1,5))
     starting_point = 1
 
-    population = Population(number = 10, \
-                            dna_size = number_of_cities, \
-                            sample = sample, \
-                            mutation_rate = 0.1, \
-                            starting_point = starting_point, \
-                            adjacency_matrix = adjacency_matrix)
+    epoch = 10
 
-    population.populate()
-    
-    print('starting genetic mutations....')
-    count = 1
+    record = []
 
-    while True:
+    for i in range(epoch):
+       
+        population = Population(number = 10, \
+                                dna_size = number_of_cities, \
+                                sample = sample, \
+                                mutation_rate = 0.1, \
+                                starting_point = starting_point, \
+                                adjacency_matrix = adjacency_matrix)
+
+        population.populate()
         
-        ## recalculation fitness scores happens over new mating pool
-        flag = population.calculate_fitness()
-        
-        if flag:
-            print('Found phrase. solution found in generation: ', count)
-            cost, path = population.record.get_lowest_score_and_path()
-            print('Path: ', path , ' cost: ', cost)
-            break
-    
-        else:
+        print('starting genetic mutations....')
+        count = 1
+
+        while True:
             
-            print('Existing mutation failed. Starting natural selection and cross over' )
-            population.natural_selection()
-    
-            print('Natural selection and cross over completed. proceeding to check again')
-    
-        count = count + 1
+            ## recalculation fitness scores happens over new mating pool
+            flag = population.calculate_fitness()
+            
+            if flag:
+                print('Found phrase. solution found in generation: ', count)
+                cost, path = population.record.get_lowest_score_and_path()
+                print('Path: ', path , ' cost: ', cost)
+                record.append((cost, path))
+                break
+        
+            else:
+                
+                print('Existing mutation failed. Starting natural selection and cross over' )
+                population.natural_selection()
+        
+                print('Natural selection and cross over completed. proceeding to check again')
+        
+            count = count + 1
 
+    print('Finding lowest score...')
+    cost = min(record, key = lambda x:x[0])
 
+    print('minimum cost is ', cost[0], ' path is ', list(filter(lambda x: x == cost, record))[0][1])
 
 execute()
