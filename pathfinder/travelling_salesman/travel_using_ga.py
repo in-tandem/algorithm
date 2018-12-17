@@ -257,4 +257,4 @@ def execute():
 
     print('minimum cost is ', cost[0], ' path is ', list(filter(lambda x: x == cost, record))[0][1])
 
-execute()
+# execute()
