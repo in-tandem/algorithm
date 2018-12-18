@@ -3,6 +3,64 @@ from copy import deepcopy
 from itertools import chain 
 
 
+def crossover(sample_a, sample_b):
+
+    # random_swath_begin , random_swath_end = random.randint(1, len(sample_a)//2) , \
+    #                             random.randint(len(sample_a)//2, len(sample_a) - 2)
+
+    ## using self assigned swath enders to make things easier
+    random_swath_begin, random_swath_end = 8, 16
+
+    sub_sample = sample_a[random_swath_begin: random_swath_end]
+    
+    sub_sample_b = [i for i in sample_b[1:len(sample_b) -1] if i not in sub_sample]
+
+    child = [sample_a[0]] + [None]* ( len(sample_a) - 2) + [sample_a[0]]
+
+    child[random_swath_begin: random_swath_end] = sub_sample
+
+    if random_swath_begin != 1:
+        # count = 0
+        
+        # for i in range(1,random_swath_begin):
+        #     child[i] = sub_sample_b[count]
+        #     count+=1
+
+        child[1: random_swath_begin] = sub_sample_b[:random_swath_begin - 1 ]
+    
+    ## at this point, we have 0:random_swath_begin + len(sub_sample) values ready
+    ## now we have to populate another total - random_swath_begin - len(sub_sample) - 1 values
+
+    count = random_swath_end
+
+    for i in range(random_swath_begin -1 , len(sub_sample_b) -1 ):
+        if None not in child:
+            break
+        if sub_sample_b[i] in child: ## this prevents duplicates
+            continue
+
+        child[count] = sub_sample_b[i]
+        count+=1
+        
+    # for i in range(random_swath_begin, len(sub_sample_b) -1 ):
+    #     child[count] = sub_sample_b[i]
+    #     count+=1
+
+    # child[random_swath_end:len(child)-1] = sub_sample_b[random_swath_begin:]
+    if None  in child:
+        print('somak')
+        number_of_none = len(list(filter(lambda x: x is None, child)))
+        difference = list(set(list(range(1,38))) - set(child))
+
+        ## for each none in child, take one from the difference set and populate
+        for count in range(len(difference)):
+            if None not in child:
+                break
+            item = difference[count]
+            index = child.index(None)
+            child[index] = item
+    return child
+
 def one_order_cross_over(sample_a, sample_b):
 
     """
@@ -23,21 +81,26 @@ def one_order_cross_over(sample_a, sample_b):
 
     """
 
-    random_swath_begin, random_swath_end = random.randint(1, len(sample_a)//2), random.randint(len(sample_a)//2, len(sample_a ) -2 )
+    ## we do not want to touch the first and last element. hence starts from 1(instead of 0)
+    ## and ends with len-2 (instead of len - 1)
+    random_swath_begin, random_swath_end = random.randint(1, len(sample_a)//2), random.randint(len(sample_a)//2, len(sample_a )  - 2 )
 
     child = sample_a[random_swath_begin: random_swath_end] + sample_b[random_swath_end:]
 
     print('diff: ', list(set(sample_b) - set(child)), ', length: ',len(sample_b)-len(child)) 
 
     diff_bw_scnd_parent_child = list(set(sample_b) - set(child))
-    length_diff_bw_scnd_parent_child = len(sample_b)-len(child) - 1
+    length_diff_bw_scnd_parent_child = len(set(sample_b))-len(set(child)) - 1
 
-    diff = random.sample(list(set(sample_b) - set(child)), len(sample_b)-len(child) - 1) \
-            if len(diff_bw_scnd_parent_child) >= length_diff_bw_scnd_parent_child else []
+    if len(diff_bw_scnd_parent_child)>0 and len(diff_bw_scnd_parent_child) >= length_diff_bw_scnd_parent_child:
+        try:
+            diff = random.sample(diff_bw_scnd_parent_child, length_diff_bw_scnd_parent_child) 
+        except ValueError as e:
+            print(e)
+    else:
+        diff = []
 
     characters_remaining = [sample_b[0]] + diff
-
-
 
     return characters_remaining+child
 
@@ -64,7 +127,13 @@ class RecordKeeper(object):
         return highest_possible_distance * self.number_of_cities
         
     def check_if_range_crossed(self, distance_travelled):
-        return True if self.heuristic_lower_range<=distance_travelled <=self.heuristic_upper_range else False
+        """
+            this particular optimization is incorrect.
+            if we select any value within the range of lowest to highest 
+            in every single generation it is finding a combination that
+            meets this particular scenario
+        """
+        return True if self.heuristic_lower_range<=distance_travelled <=(self.heuristic_upper_range/3) else False
 
     def score(self, path, score):
 
@@ -142,7 +211,7 @@ class Population(object):
             parent2 = mating_pool[random_index_2]
 
             child = parent1.mate(parent2)
-
+            print('lenght of child : ',len(child.gene))
             self.dna[i] = child.mutate(self.sample, self.mutation_rate)
 
     def calculate_fitness(self):
@@ -175,15 +244,12 @@ class DNA(object):
         
         sum = 0
 
+        print('gene to check fitness is : ', self.gene , ' none present in gene : ', None in self.gene)
         for count in range(len(self.gene)-2):
             
-            ## TODO problem here obvious index out of bounds
             sum = sum + adjacency_matrix[self.gene[count ] - 1][self.gene[count + 1] -1 ]
 
-        # sum = sum + adjacency_matrix[self.gene[-1]][self.gene[0]]
-
         self.fitness = sum
-
 
 
     def mutate(self,sample, mutation_rate):
@@ -197,7 +263,7 @@ class DNA(object):
     def mate(self, another_dna):
 
         ## dont touch the starting and ending point ever
-        return DNA(one_order_cross_over(self.gene, another_dna.gene))
+        return DNA(crossover(self.gene, another_dna.gene))
 
     
 

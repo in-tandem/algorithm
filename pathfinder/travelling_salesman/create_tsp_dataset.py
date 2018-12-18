@@ -64,19 +64,19 @@ print(cities)
 
 def execute_djibuouti(adjacency_matrix, number_of_djibouti_scities, sample):
 
-    starting_point = 13
+    starting_point = 1
 
     epoch = 1000
 
     record = []
 
-    for i in range(1, number_of_djibouti_scities + 1):
+    for i in range(epoch):
        
-        population = Population(number = 50, \
+        population = Population(number = 500, \
                                 dna_size = number_of_djibouti_scities, \
                                 sample = sample, \
                                 mutation_rate = 0.1, \
-                                starting_point = i, \
+                                starting_point = starting_point, \
                                 adjacency_matrix = adjacency_matrix)
 
         population.populate()
@@ -110,4 +110,43 @@ def execute_djibuouti(adjacency_matrix, number_of_djibouti_scities, sample):
 
     print('minimum cost is ', cost[0], ' path is ', list(filter(lambda x: x == cost, record))[0][1])
 
+def cost_function(adjacency_matrix,starting_point, points, end_point, sum_distance = 0):
+    """
+
+    :param points : sequence of other locations to be scanned, if length is one. means we can calc the distaince
+    :param end_point : current end point. ie dist(starting_point, end_point). end_point is returned so we can show the path
+    :param sum_distance: sum of cost of distance travelled so far
+    """
+ 
+    end_point = [] if end_point is None else end_point
+
+    if len(points) == 1:
+        sum_distance = sum_distance + adjacency_matrix[starting_point-1][points[0]-1]
+        end_point.append(points[0])
+        return sum_distance  ,end_point
+
+    else:
+
+        ## you select a pool with all possibilities except a single element k and statting point s
+        ## calculate cost of each
+        ## select the ones with lowest cost
+        ## in case , pool selections are greater than single value, recursion would apply
+        print('finding minimum again', sum_distance)
+        return min(map(lambda x :cost_function(adjacency_matrix,starting_point,[x], end_point + [x],sum_distance) + \
+                cost_function(adjacency_matrix, x, [i for i in points if i !=x and i!= starting_point],end_point + [x],sum_distance),\
+                 points))
+
+
+def execute_djibouti_using_dynamic_programming(adjacency_matrix, number_of_cities, cities):
+    
+    starting_point = 1
+    cost_and_path = cost_function(adjacency_matrix,starting_point, cities, None, sum_distance = 0)
+
+    print('shortest cost : ', sum(cost_and_path[::2])+ \
+    adjacency_matrix[starting_point-1][cost_and_path[-1][-1]-1], \
+        ' \n path: ', cost_and_path[-1])
+
 execute_djibuouti(adjacency_matrix, number_of_cities, cities)
+
+
+# execute_djibouti_using_dynamic_programming(adjacency_matrix, number_of_cities, cities)

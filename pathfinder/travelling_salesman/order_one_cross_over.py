@@ -59,5 +59,68 @@ def execute():
 
     print('sample_a : ', a, ' sample_b : ', b,' child:',one_order_cross_over(a,b))
 
+def crossover(sample_a, sample_b):
 
-execute()
+    # random_swath_begin , random_swath_end = random.randint(1, len(sample_a)//2) , \
+    #                             random.randint(len(sample_a)//2, len(sample_a) - 2)
+
+    ## using self assigned swath enders to make things easier
+    random_swath_begin, random_swath_end = 8, 16
+
+    sub_sample = sample_a[random_swath_begin: random_swath_end]
+    
+    sub_sample_b = [i for i in sample_b[1:len(sample_b) -1] if i not in sub_sample]
+
+    child = [sample_a[0]] + [None]* ( len(sample_a) - 2) + [sample_a[0]]
+
+    child[random_swath_begin: random_swath_end] = sub_sample
+
+    if random_swath_begin != 1:
+        # count = 0
+        
+        # for i in range(1,random_swath_begin):
+        #     child[i] = sub_sample_b[count]
+        #     count+=1
+
+        child[1: random_swath_begin] = sub_sample_b[:random_swath_begin - 1 ]
+    
+    ## at this point, we have 0:random_swath_begin + len(sub_sample) values ready
+    ## now we have to populate another total - random_swath_begin - len(sub_sample) - 1 values
+
+    count = random_swath_end
+
+    for i in range(random_swath_begin -1 , len(sub_sample_b) -1 ):
+        child[count] = sub_sample_b[i]
+        count+=1
+    
+    # for i in range(random_swath_begin, len(sub_sample_b) -1 ):
+    #     child[count] = sub_sample_b[i]
+    #     count+=1
+
+    # child[random_swath_end:len(child)-1] = sub_sample_b[random_swath_begin:]
+    if None  in child:
+        print('somak')
+        number_of_none = len(list(filter(lambda x: x is None, child)))
+        difference = list(set(list(range(1,38))) - set(child))
+
+        ## for each none in child, take one from the difference set and populate
+        for count in range(len(difference)):
+            item = difference[count]
+            index = child.index(None)
+            child[index] = item
+
+
+    return child
+
+# execute()
+import random
+sample_a = random.sample(range(39), 38)
+sample_b = random.sample(range(39), 38)
+
+sample_a = [13, 21, 36, 24, 35, 31, 8, 16, 27, 2, 1, 30, 18, 32, 7, 37, 25, 22, 19, 4, 20, 9, 17, 26, 23, 14, 10, 33, 29, 5, 15, 38, 3, 11, 12, 34, 6, 13]
+sample_b = [13, 17, 29, 8, 11, 30, 6, 22, 16, 19, 33, 5, 20, 25, 3, 4, 31, 27, 18, 32, 2, 34, 23, 12, 24, 10, 1, 21, 15, 7, 36, 37, 26, 9, 14, 35, 28, 13]
+
+for _ in range(100):
+    item = crossover(sample_a,sample_b)
+    print('child len: ', len(item), ' none present: ', None in item)
+
