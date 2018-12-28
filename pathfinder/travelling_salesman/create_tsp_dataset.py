@@ -64,7 +64,7 @@ print(cities)
 
 def execute_djibuouti(adjacency_matrix, number_of_djibouti_scities, sample):
 
-    starting_point = 1
+    starting_point = 11
 
     epoch = 1000
 
@@ -72,6 +72,8 @@ def execute_djibuouti(adjacency_matrix, number_of_djibouti_scities, sample):
 
     for i in range(epoch):
        
+       ## in cases where starting_point is not given it is important to check if 
+       ## algorithm can create the optimum route
         population = Population(number = 500, \
                                 dna_size = number_of_djibouti_scities, \
                                 sample = sample, \
