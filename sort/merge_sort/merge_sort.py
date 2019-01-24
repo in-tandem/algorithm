@@ -15,7 +15,9 @@ import numpy as np
 l = [11,2,5,3,7,22,10, -9,0,1,345]
 
 def merge_sort(l):
-    # l = 
+    # complexity .. to create lists we iterate over each so n
+    # merging we split..so log n
+    # total complexity is O(nlogn)
     response = m_way_merge([[i] for i in l])
 
     print('my final merge sorted list is ', response)
