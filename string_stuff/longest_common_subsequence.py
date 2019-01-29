@@ -1,6 +1,9 @@
 main_string = 'aaabghsaadfcd'
 sub_string = 'abadf'
 
+import functools
+
+@functools.lru_cache(maxsize=128)
 def lcs(smaller_string, larger_string):
     
     if len(smaller_string)==0 or len(larger_string)==0:
@@ -41,5 +44,5 @@ def lcs_memo(smaller_string, larger_string, memo):
             )
 
 
-
-print(lcs_memo(sub_string,main_string,{}))
+print(lcs(sub_string,main_string))
+# print(lcs_memo(sub_string,main_string,{}))
