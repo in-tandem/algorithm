@@ -24,8 +24,8 @@ this might not be possible in the leaf nodes.
 
 2. at every insertion we maintain the heap order. which is.. child nodes have to be larger than the parent node
 
-the advantage of ensuring part 1 is that we can easily get its parents. if n is a child, the parent node is n//2, 
-where n is position in the list
+the advantage of ensuring part 1 is that we can easily get its parents. if n is a child, 
+the parent node is n//2, where n is position in the list
 
 '''
 
